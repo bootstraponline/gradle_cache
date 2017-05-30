@@ -1,20 +1,65 @@
 package main
 
 import (
-	"errors"
+       "errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
+	"strings"A
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-tools/go-steputils/cache"
-	"github.com/kballard/go-shellquote"
 )
+
+// ConfigsModel ...
+type ConfigsModel struct {
+	// Gradle Inputs
+	GradlewPath              string
+}
+
+func createConfigsModelFromEnvs() ConfigsModel {
+	return ConfigsModel{
+		GradleFile:               os.Getenv("gradle_file"),
+		GradleTasks:              os.Getenv("gradle_task"),
+		GradlewPath:              os.Getenv("gradlew_path"),
+		GradleOptions:            os.Getenv("gradle_options"),
+		ApkFileIncludeFilter:     os.Getenv("apk_file_include_filter"),
+		ApkFileExcludeFilter:     os.Getenv("apk_file_exclude_filter"),
+		MappingFileIncludeFilter: os.Getenv("mapping_file_include_filter"),
+		MappingFileExcludeFilter: os.Getenv("mapping_file_exclude_filter"),
+		//
+		DeployDir: os.Getenv("BITRISE_DEPLOY_DIR"),
+	}
+}
+
+func (configs ConfigsModel) print() {
+
+	log.Infof("Configs:")
+	log.Printf("- GradlewPath: %s", configs.GradlewPath)
+}
+
+func (configs ConfigsModel) validate() (string, error) {
+	if configs.GradlewPath == "" {
+		explanation := `
+Using a Gradle Wrapper (gradlew) is required, as the wrapper is what makes sure
+that the right Gradle version is installed and used for the build.
+You can find more information about the Gradle Wrapper (gradlew),
+and about how you can generate one (if you would not have one already
+in the official guide at: https://docs.gradle.org/current/userguide/gradle_wrapper.html`
+
+		return explanation, errors.New("no GradlewPath parameter specified")
+	}
+	if exist, err := pathutil.IsPathExists(configs.GradlewPath); err != nil {
+		return "", fmt.Errorf("Failed to check if GradlewPath exist at: %s, error: %s", configs.GradlewPath, err)
+	} else if !exist {
+		return "", fmt.Errorf("GradlewPath not exist at: %s", configs.GradlewPath)
+	}
+
+	return "", nil
+}
+
 
 func exportEnvironmentWithEnvman(keyStr, valueStr string) error {
 	cmd := command.New("envman", "add", "--key", keyStr)
