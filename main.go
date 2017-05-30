@@ -13,45 +13,6 @@ import (
 	"github.com/bitrise-tools/go-steputils/cache"
 )
 
-// ConfigsModel ...
-type ConfigsModel struct {
-	// Gradle Inputs
-	GradlewPath              string
-}
-
-func createConfigsModelFromEnvs() ConfigsModel {
-	return ConfigsModel{
-		GradlewPath:              os.Getenv("gradlew_path"),
-	}
-}
-
-func (configs ConfigsModel) print() {
-
-	log.Infof("Configs:")
-	log.Printf("- GradlewPath: %s", configs.GradlewPath)
-}
-
-func (configs ConfigsModel) validate() (string, error) {
-	if configs.GradlewPath == "" {
-		explanation := `
-Using a Gradle Wrapper (gradlew) is required, as the wrapper is what makes sure
-that the right Gradle version is installed and used for the build.
-You can find more information about the Gradle Wrapper (gradlew),
-and about how you can generate one (if you would not have one already
-in the official guide at: https://docs.gradle.org/current/userguide/gradle_wrapper.html`
-
-		return explanation, errors.New("no GradlewPath parameter specified")
-	}
-	if exist, err := pathutil.IsPathExists(configs.GradlewPath); err != nil {
-		return "", fmt.Errorf("Failed to check if GradlewPath exist at: %s, error: %s", configs.GradlewPath, err)
-	} else if !exist {
-		return "", fmt.Errorf("GradlewPath not exist at: %s", configs.GradlewPath)
-	}
-
-	return "", nil
-}
-
-
 func exportEnvironmentWithEnvman(keyStr, valueStr string) error {
 	cmd := command.New("envman", "add", "--key", keyStr)
 	cmd.SetStdin(strings.NewReader(valueStr))
@@ -64,21 +25,6 @@ func failf(message string, args ...interface{}) {
 }
 
 func main() {
-        configs := createConfigsModelFromEnvs()
-	configs.print()
-	if explanation, err := configs.validate(); err != nil {
-		fmt.Println()
-		log.Errorf("Issue with input: %s", err)
-		fmt.Println()
-
-		if explanation != "" {
-			fmt.Println(explanation)
-			fmt.Println()
-		}
-
-		os.Exit(1)
-	}
-	
 	// Collecting caches
 	fmt.Println()
 	log.Infof("Collecting gradle caches...")
@@ -105,7 +51,7 @@ func main() {
 		"/*.apk",
 	}
 
-	projectRoot, err := filepath.Abs(filepath.Dir(configs.GradlewPath))
+	projectRoot, err := filepath.Abs(os.Getenv("BITRISE_SOURCE_DIR"))
 	if err != nil {
 		log.Warnf("Cache collection skipped: failed to determine project root path.")
 	} else {
