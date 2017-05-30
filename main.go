@@ -1,11 +1,11 @@
 package main
 
 import (
-       "errors"
+        "errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"A
+	"strings"
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
@@ -21,16 +21,7 @@ type ConfigsModel struct {
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
-		GradleFile:               os.Getenv("gradle_file"),
-		GradleTasks:              os.Getenv("gradle_task"),
 		GradlewPath:              os.Getenv("gradlew_path"),
-		GradleOptions:            os.Getenv("gradle_options"),
-		ApkFileIncludeFilter:     os.Getenv("apk_file_include_filter"),
-		ApkFileExcludeFilter:     os.Getenv("apk_file_exclude_filter"),
-		MappingFileIncludeFilter: os.Getenv("mapping_file_include_filter"),
-		MappingFileExcludeFilter: os.Getenv("mapping_file_exclude_filter"),
-		//
-		DeployDir: os.Getenv("BITRISE_DEPLOY_DIR"),
 	}
 }
 
