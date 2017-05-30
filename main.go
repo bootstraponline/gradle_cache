@@ -64,6 +64,21 @@ func failf(message string, args ...interface{}) {
 }
 
 func main() {
+        configs := createConfigsModelFromEnvs()
+	configs.print()
+	if explanation, err := configs.validate(); err != nil {
+		fmt.Println()
+		log.Errorf("Issue with input: %s", err)
+		fmt.Println()
+
+		if explanation != "" {
+			fmt.Println(explanation)
+			fmt.Println()
+		}
+
+		os.Exit(1)
+	}
+	
 	// Collecting caches
 	fmt.Println()
 	log.Infof("Collecting gradle caches...")
