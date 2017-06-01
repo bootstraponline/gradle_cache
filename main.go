@@ -37,17 +37,19 @@ func main() {
 		filepath.Join(homeDir, ".android", "build-cache"),
 	}
 	excludePths := []string{
-		"/*.lock",
-		"/*.bin",
-		"/*/build/*.json",
-		"/*/build/*.xml",
-		"/*/build/*.properties",
-		"/*/build/*/zip-cache/*",
-		"/*.log",
-		"/*.txt",
-		"/*.rawproto",
-		"/*.ap_",
-		"/*.apk",
+		"~/.gradle/**",
+		"~/.android/build-cache/**",
+		"*.lock",
+		"*.bin",
+		"/**/build/**.json",
+		"/**/build/**.xml",
+		"/**/build/**.properties",
+		"/**/build/**/zip-cache/**",
+		"*.log",
+		"*.txt",
+		"*.rawproto",
+		"!*.ap_",
+		"!*.apk",
 	}
 
 	projectRoot, err := filepath.Abs(os.Getenv("BITRISE_SOURCE_DIR"))
